@@ -39,7 +39,7 @@ public class TechnicalLanguageDetectorImplTest {
     private LanguageDetector makeDetector() {
         //building exactly like the old detector behaved.
         LanguageDetectorBuilder detectorBuilder = LanguageDetectorBuilder.create(NgramExtractor.gramLengths(1))
-                .affixFactor(1.0)
+                .affixFactor(1.0f)
                 .shortTextAlgorithm(0);
 
         LanguageProfileBuilder profileBuilder = new LanguageProfileBuilder(LdLocale.fromString("en"));
@@ -64,24 +64,24 @@ public class TechnicalLanguageDetectorImplTest {
     @Test
     public final void testDetector1() {
         LanguageDetector languageDetector = makeDetector();
-        assertEquals(languageDetector.detect("a").get().getLanguage(), "en");
+        assertEquals(languageDetector.detect("a").getLanguage(), "en");
     }
 
     @Test
     public final void testDetector2() {
         LanguageDetector languageDetector = makeDetector();
-        assertEquals(languageDetector.detect("b d").get().getLanguage(), "fr");
+        assertEquals(languageDetector.detect("b d").getLanguage(), "fr");
     }
 
     @Test
     public final void testDetector3() {
         LanguageDetector languageDetector = makeDetector();
-        assertEquals(languageDetector.detect("d e").get().getLanguage(), "en");
+        assertEquals(languageDetector.detect("d e").getLanguage(), "en");
     }
 
     @Test
     public final void testDetector4() {
         LanguageDetector languageDetector = makeDetector();
-        assertEquals(languageDetector.detect("\u3042\u3042\u3042\u3042a").get().getLanguage(), "ja");
+        assertEquals(languageDetector.detect("\u3042\u3042\u3042\u3042a").getLanguage(), "ja");
     }
 }

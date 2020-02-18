@@ -16,8 +16,6 @@
 
 package com.optimaize.langdetect.cybozu.util;
 
-import org.jetbrains.annotations.Nullable;
-
 /**
  * TODO document.
  *
@@ -69,7 +67,6 @@ public class NGram {
      * @param n length of n-gram
      * @return n-Gram String (null if it is invalid)
      */
-    @Nullable
     public String get(int n) {
         if (capitalword_) return null;
         int len = grams_.length(); 

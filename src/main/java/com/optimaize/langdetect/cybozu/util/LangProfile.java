@@ -20,8 +20,6 @@
 
 package com.optimaize.langdetect.cybozu.util;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -105,7 +103,7 @@ public class LangProfile implements Serializable {
      * Add n-gram to profile
      * @param gram
      */
-    public void add(@NotNull String gram) {
+    public void add(String gram) {
         if (name == null) throw new IllegalStateException();
         int len = gram.length();
         if (len < 1 || len > NGram.N_GRAM) {

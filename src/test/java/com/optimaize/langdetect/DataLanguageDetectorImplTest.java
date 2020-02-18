@@ -58,21 +58,21 @@ public class DataLanguageDetectorImplTest {
     }
 
     @Test(dataProvider = "shortCleanTexts")
-    public void shortTextAlgo(String expectedLanguage, CharSequence text) throws IOException {
+    public void shortTextAlgo(String expectedLanguage, CharSequence text) {
         assertEquals(shortDetector.getProbabilities(text).get(0).getLocale().getLanguage(), expectedLanguage);
         //the detect() method doesn't have enough confidence for all these short texts.
     }
 
     @Test(dataProvider = "shortCleanTexts")
-    public void longTextAlgoWorkingOnShortText(String expectedLanguage, CharSequence text) throws IOException {
+    public void longTextAlgoWorkingOnShortText(String expectedLanguage, CharSequence text) {
         assertEquals(longDetector.getProbabilities(text).get(0).getLocale().getLanguage(), expectedLanguage);
         //the detect() method doesn't have enough confidence for all these short texts.
     }
 
     @Test(dataProvider = "longerWikipediaTexts")
-    public void longTextAlgoWorkingOnLongText(String expectedLanguage, CharSequence text) throws IOException {
+    public void longTextAlgoWorkingOnLongText(String expectedLanguage, CharSequence text) {
         assertEquals(longDetector.getProbabilities(text).get(0).getLocale().getLanguage(), expectedLanguage);
-        assertEquals(longDetector.detect(text).get().getLanguage(), expectedLanguage);
+        assertEquals(longDetector.detect(text).getLanguage(), expectedLanguage);
     }
 
     @DataProvider

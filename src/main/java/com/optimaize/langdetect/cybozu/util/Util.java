@@ -20,7 +20,6 @@ import com.optimaize.langdetect.i18n.LdLocale;
 import com.optimaize.langdetect.ngram.NgramExtractor;
 import com.optimaize.langdetect.ngram.NgramExtractors;
 import com.optimaize.langdetect.ngram.OldNgramExtractor;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Formatter;
 import java.util.List;
@@ -32,12 +31,10 @@ import java.util.Map;
  * @author Nakatani Shuyo
  */
 public class Util {
-
     private static final NgramExtractor ngramExtractor = NgramExtractors.standard();
 
     public static void addCharSequence(LangProfile langProfile, CharSequence text) {
         //TODO replace with new code.
-
 //        List<String> old = OldNgramExtractor.extractNGrams(text, null);
 //        List<String> nuu = ngramExtractor.extractGrams(text);
 //
@@ -50,8 +47,6 @@ public class Util {
 //        ArrayList<String> justOld = new ArrayList<>(old);
 //        justOld.removeAll(nuu);
 //
-//        System.out.println(text);
-
 //        for (String s : ngramExtractor.extractGrams(text)) {
 //            langProfile.add(s);
 //        }
@@ -85,11 +80,11 @@ public class Util {
      * normalize probabilities and check convergence by the maximum probability
      * @return maximum of probabilities
      */
-    public static double normalizeProb(double[] prob) {
-        double maxp = 0, sump = 0;
+    public static float normalizeProb(float[] prob) {
+        float maxp = 0, sump = 0;
         for(int i=0;i<prob.length;++i) sump += prob[i];
         for(int i=0;i<prob.length;++i) {
-            double p = prob[i] / sump;
+            float p = prob[i] / sump;
             if (maxp < p) maxp = p;
             prob[i] = p;
         }
@@ -97,10 +92,10 @@ public class Util {
     }
 
 
-    public static String wordProbToString(double[] prob, List<LdLocale> langlist) {
+    public static String wordProbToString(float[] prob, List<LdLocale> langlist) {
         Formatter formatter = new Formatter();
         for(int j=0;j<prob.length;++j) {
-            double p = prob[j];
+            float p = prob[j];
             if (p>=0.00001) {
                 formatter.format(" %s:%.5f", langlist.get(j), p);
             }
@@ -111,15 +106,15 @@ public class Util {
 
     /**
      */
-    public static double[] makeInternalPrioMap(@NotNull Map<LdLocale, Double> langWeightingMap,
-                                                @NotNull List<LdLocale> langlist) {
+    public static float[] makeInternalPrioMap(Map<LdLocale, Float> langWeightingMap,
+                                                List<LdLocale> langlist) {
         assert !langWeightingMap.isEmpty();
-        double[] priorMap = new double[langlist.size()];
-        double sump = 0;
+        float[] priorMap = new float[langlist.size()];
+        float sump = 0;
         for (int i=0;i<priorMap.length;++i) {
             LdLocale lang = langlist.get(i);
             if (langWeightingMap.containsKey(lang)) {
-                double p = langWeightingMap.get(lang);
+                float p = langWeightingMap.get(lang);
                 assert p>=0 : "Prior probability must be non-negative!";
                 priorMap[i] = p;
                 sump += p;

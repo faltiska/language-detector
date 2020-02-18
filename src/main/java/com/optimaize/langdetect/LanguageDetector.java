@@ -16,7 +16,6 @@
 
 package com.optimaize.langdetect;
 
-import com.google.common.base.Optional;
 import com.optimaize.langdetect.i18n.LdLocale;
 
 import java.util.List;
@@ -45,7 +44,7 @@ public interface LanguageDetector {
      * @param text You probably want a {@link com.optimaize.langdetect.text.TextObject}.
      * @return The language if confident, absent if unknown or not confident enough.
      */
-    Optional<LdLocale> detect(CharSequence text);
+    LdLocale detect(CharSequence text);
 
     /**
      * Returns all languages with at least some likeliness.

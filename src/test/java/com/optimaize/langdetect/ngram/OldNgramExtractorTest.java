@@ -15,12 +15,8 @@
  */
 
 package com.optimaize.langdetect.ngram;
-
-import com.google.common.base.Stopwatch;
 import org.junit.Test;
-
 import java.util.*;
-
 import static org.junit.Assert.*;
 
 /**
@@ -49,11 +45,11 @@ public class OldNgramExtractorTest {
     @Test
     public void stressTestAlgo1() {
         String text = "Foo bar hello world and so on nana nunu dada dudu asdf asdf akewf köjvnawer aisdfj awejfr iajdsöfj ewi adjsköfjwei ajsdökfj ief asd";
-        Stopwatch stopwatch = Stopwatch.createStarted();
+        long start = System.currentTimeMillis();
         for (int i=0; i<100000; i++) {
             OldNgramExtractor.extractNGrams(text, null); //2.745s
         }
-        System.out.println(stopwatch);
+        System.out.println("elapsed: " + (System.currentTimeMillis() - start));
     }
 
 }

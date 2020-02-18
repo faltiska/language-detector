@@ -23,8 +23,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <compiler.source>1.7</compiler.source>
-        <compiler.target>1.7</compiler.target>
+        <compiler.source>1.8</compiler.source>
+        <compiler.target>1.8</compiler.target>
     </properties>
 
     <developers>
@@ -219,16 +219,6 @@
             <groupId>net.arnx</groupId>
             <artifactId>jsonic</artifactId>
             <version>1.2.11</version>
-        </dependency>
-        <dependency><!-- used for the @NotNull and @Nullable annotations -->
-            <groupId>com.intellij</groupId>
-            <artifactId>annotations</artifactId>
-            <version>12.0</version>
-        </dependency>
-        <dependency><!-- used for the Optional and other things -->
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>19.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

@@ -15,12 +15,7 @@
  */
 
 package com.optimaize.langdetect.i18n;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Splitter;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
+import java.util.Objects;
 
 /**
  * A language-detector implementation of a Locale, similar to the java.util.Locale.
@@ -64,15 +59,11 @@ import java.util.List;
  * @author fabian kessler
  */
 public final class LdLocale {
-
-    @NotNull
     private final String language;
-    @NotNull
-    private final Optional<String> script;
-    @NotNull
-    private final Optional<String> region;
+    private final String script;
+    private final String region;
 
-    private LdLocale(@NotNull String language, @NotNull Optional<String> script, @NotNull Optional<String> region) {
+    private LdLocale(String language, String script, String region) {
         this.language = language;
         this.script = script;
         this.region = region;
@@ -82,32 +73,30 @@ public final class LdLocale {
      * @param string The output of the toString() method.
      * @return either a new or possibly a cached (immutable) instance.
      */
-    @NotNull
-    public static LdLocale fromString(@NotNull String string) {
-        if (string==null || string.isEmpty()) throw new IllegalArgumentException("At least a language is required!");
+    public static LdLocale fromString(String string) {
+        if (string.isEmpty()) throw new IllegalArgumentException("At least a language is required!");
 
         String language = null;
-        Optional<String> script = null;
-        Optional<String> region = null;
+        String script = null;
+        String region = null;
 
-        List<String> strings = Splitter.on('-').splitToList(string);
-        for (int i=0; i<strings.size(); i++) {
-            String chunk = strings.get(i);
+        String[] strings = string.split("-");
+        for (int i=0; i<strings.length; i++) {
+            String chunk = strings[i];
             if (i==0) {
                 language = assignLang(chunk);
             } else {
                 if (script == null && region == null && looksLikeScriptCode(chunk)) {
-                    script = Optional.of(chunk);
+                    script = chunk;
                 } else if (region==null && (looksLikeGeoCode3166_1(chunk) || looksLikeGeoCodeNumeric(chunk))) {
-                    region = Optional.of(chunk);
+                    region = chunk;
                 } else {
                     throw new IllegalArgumentException("Unknown part: >>>"+chunk+"<<<!");
                 }
             }
         }
-        assert language != null;
-        if (script==null) script = Optional.absent();
-        if (region==null) region = Optional.absent();
+
+        Objects.requireNonNull(language);
         return new LdLocale(language, script, region);
     }
 
@@ -136,14 +125,12 @@ public final class LdLocale {
 
         sb.append(language);
 
-        if (script.isPresent()) {
-            sb.append('-');
-            sb.append(script.get());
+        if (script != null) {
+            sb.append('-').append(script);
         }
 
-        if (region.isPresent()) {
-            sb.append('-');
-            sb.append(region.get());
+        if (region != null) {
+            sb.append('-').append(region);
         }
 
         return sb.toString();
@@ -153,7 +140,6 @@ public final class LdLocale {
     /**
      * @return ISO 639-1 or 639-3 language code, eg "fr" or "gsw", see class header.
      */
-    @NotNull
     public String getLanguage() {
         return language;
     }
@@ -161,20 +147,16 @@ public final class LdLocale {
     /**
      * @return ISO 15924 script code, eg "Latn", see class header.
      */
-    @NotNull
-    public Optional<String> getScript() {
+    public String getScript() {
         return script;
     }
 
     /**
      * @return ISO 3166-1 or UN M.49 code, eg "DE" or 150, see class header.
      */
-    @NotNull
-    public Optional<String> getRegion() {
+    public String getRegion() {
         return region;
     }
-
-
 
     @Override //generated-code
     public boolean equals(Object o) {
@@ -184,17 +166,19 @@ public final class LdLocale {
         LdLocale ldLocale = (LdLocale) o;
 
         if (!language.equals(ldLocale.language)) return false;
-        if (!region.equals(ldLocale.region)) return false;
-        if (!script.equals(ldLocale.script)) return false;
-
-        return true;
+        if (region != null && !region.equals(ldLocale.region)) return false;
+        return script != null && script.equals(ldLocale.script);
     }
 
     @Override //generated-code
     public int hashCode() {
         int result = language.hashCode();
-        result = 31 * result + script.hashCode();
-        result = 31 * result + region.hashCode();
+        if(script != null) {
+            result = 31 * result + script.hashCode();
+        }
+        if(region != null) {
+            result = 31 * result + region.hashCode();
+        }
         return result;
     }
 }

@@ -34,7 +34,7 @@ public class DetectedLanguageTest {
 
     @Test
     public final void basic() {
-        DetectedLanguage lang = new DetectedLanguage(LdLocale.fromString("en"), 1.0);
+        DetectedLanguage lang = new DetectedLanguage(LdLocale.fromString("en"), 1.0f);
         assertEquals(lang.getLocale().getLanguage(), "en");
         assertEquals(lang.getProbability(), 1.0, 0.0001);
         assertEquals(lang.toString(), "DetectedLanguage[en:1.0]");
@@ -42,15 +42,15 @@ public class DetectedLanguageTest {
 
     @Test(expected = IllegalArgumentException.class)
     public final void invalidProbability() {
-        new DetectedLanguage(LdLocale.fromString("en"), 1.1);
+        new DetectedLanguage(LdLocale.fromString("en"), 1.1f);
     }
 
     @Test
     public final void comparable() {
         List<DetectedLanguage> list = new ArrayList<>();
-        list.add(new DetectedLanguage(LdLocale.fromString("en"), 1.0));
-        list.add(new DetectedLanguage(LdLocale.fromString("de"), 1.0));
-        list.add(new DetectedLanguage(LdLocale.fromString("fr"), 0.9));
+        list.add(new DetectedLanguage(LdLocale.fromString("en"), 1.0f));
+        list.add(new DetectedLanguage(LdLocale.fromString("de"), 1.0f));
+        list.add(new DetectedLanguage(LdLocale.fromString("fr"), 0.9f));
         Collections.sort(list);
         assertEquals(list.get(0).getLocale().getLanguage(), "de"); //alphabetical de before en
         assertEquals(list.get(1).getLocale().getLanguage(), "en");

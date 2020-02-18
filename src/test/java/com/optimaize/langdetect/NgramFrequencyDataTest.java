@@ -16,7 +16,6 @@
 
 package com.optimaize.langdetect;
 
-import com.google.common.collect.ImmutableSet;
 import com.optimaize.langdetect.i18n.LdLocale;
 import com.optimaize.langdetect.profiles.LanguageProfile;
 import com.optimaize.langdetect.profiles.LanguageProfileReader;
@@ -24,6 +23,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -44,18 +44,18 @@ public class NgramFrequencyDataTest {
     }
     private static NgramFrequencyData forAll(int gramSize) throws IOException {
         List<LanguageProfile> languageProfiles = new LanguageProfileReader().readAllBuiltIn();
-        return NgramFrequencyData.create(languageProfiles, ImmutableSet.of(gramSize));
+        return NgramFrequencyData.create(languageProfiles, Collections.singletonList(gramSize));
     }
 
 
     @Test
-    public void size() throws Exception {
+    public void size() {
         //update the number when adding built-in languages
         assertEquals(allThreeGrams.getLanguageList().size(), 71);
     }
 
     @Test
-    public void constantOrder() throws Exception {
+    public void constantOrder() {
         //expect constant order:
         int pos=0;
         for (LdLocale locale : allThreeGrams.getLanguageList()) {
@@ -65,15 +65,15 @@ public class NgramFrequencyDataTest {
     }
 
     @Test
-    public void expectGram() throws Exception {
+    public void expectGram() {
         //this must exist in many languages
-        double[] probabilities = allThreeGrams.getProbabilities("dam");
+        float[] probabilities = allThreeGrams.getProbabilities("dam");
         assert probabilities != null;
         assertTrue(probabilities.length >= 5 && probabilities.length <= allThreeGrams.getLanguageList().size());
     }
 
     @Test
-    public void forbidGramOfWrongSize() throws Exception {
+    public void forbidGramOfWrongSize() {
         //we said 3-grams, not 2 grams
         assertEquals(allThreeGrams.getProbabilities("da"), null);
     }

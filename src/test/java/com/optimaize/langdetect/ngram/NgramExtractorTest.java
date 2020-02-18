@@ -16,7 +16,6 @@
 
 package com.optimaize.langdetect.ngram;
 
-import com.google.common.base.Stopwatch;
 import org.junit.Test;
 
 import java.util.*;
@@ -77,13 +76,13 @@ public class NgramExtractorTest {
 
     @Test
     public void stressTestAlgo2() {
+        long start = System.currentTimeMillis();
         NgramExtractor ngramExtractor = NgramExtractor.gramLengths(1, 2, 3);
         String text = "Foo bar hello world and so on nana nunu dada dudu asdf asdf akewf köjvnawer aisdfj awejfr iajdsöfj ewi adjsköfjwei ajsdökfj ief asd";
-        Stopwatch stopwatch = Stopwatch.createStarted();
         for (int i=0; i<100000; i++) {
             ngramExtractor.extractGrams(text);
         }
-        System.out.println(stopwatch); //876.6ms
+        System.out.println("elapsed: " + (System.currentTimeMillis() - start));
     }
 
 

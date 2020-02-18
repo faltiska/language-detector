@@ -19,7 +19,7 @@ package com.optimaize.langdetect.frma;
 import com.optimaize.langdetect.cybozu.util.LangProfile;
 
 import java.io.*;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,23 +38,23 @@ public class LangProfileReader {
     /**
      * Reads a {@link LangProfile} from a File in UTF-8.
      */
-    public LangProfile read(File profileFile) throws IOException {
+    public LangProfile read(File profileFile, String name) throws IOException {
         if (!profileFile.exists()) {
             throw new IOException("No such file: "+profileFile);
         } else if (!profileFile.canRead()) {
             throw new IOException("Cannot read file: "+profileFile);
         }
         try (FileInputStream input = new FileInputStream(profileFile)) {
-            return read(input);
+            return read(input, name);
         }
     }
 
     /**
      * Reads a {@link LangProfile} from an InputStream in UTF-8.
      */
-	public LangProfile read(InputStream inputStream) throws IOException {
+	public LangProfile read(InputStream inputStream, String name) throws IOException {
 		StringBuilder buffer = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("utf-8")))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             String line;
             while((line = reader.readLine()) != null) {
                 if (buffer.length() > 0) {
@@ -86,10 +86,7 @@ public class LangProfileReader {
 			}
 		}
 		
-		m = NAME_PATTERN.matcher(storedProfile);
-		if (m.find()) {
-			langProfile.setName(m.group(1));
-		}
+		langProfile.setName(name);
 
 		return langProfile;
 	}

@@ -18,7 +18,6 @@ package com.optimaize.langdetect.cybozu;
 
 import com.optimaize.langdetect.frma.LangProfileWriter;
 import com.optimaize.langdetect.cybozu.util.LangProfile;
-import com.google.common.base.Optional;
 import com.optimaize.langdetect.DetectedLanguage;
 import com.optimaize.langdetect.LanguageDetector;
 import com.optimaize.langdetect.LanguageDetectorBuilder;
@@ -29,8 +28,6 @@ import com.optimaize.langdetect.profiles.LanguageProfileReader;
 import com.optimaize.langdetect.text.CommonTextObjectFactories;
 import com.optimaize.langdetect.text.TextObject;
 import com.optimaize.langdetect.text.TextObjectFactory;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.*;
@@ -51,7 +48,7 @@ import java.util.*;
 public class CommandLineInterface {
 
     /** smoothing default parameter (ELE) */
-    private static final double DEFAULT_ALPHA = 0.5;
+    private static final float DEFAULT_ALPHA = 0.5f;
 
     /** for Command line easy parser */
     private final Map<String, String> opt_with_value = new HashMap<>();
@@ -102,8 +99,7 @@ public class CommandLineInterface {
         values.put(key, value);
     }
 
-    @NotNull
-    private String requireParamString(@NotNull String key) {
+    private String requireParamString(String key) {
         String s = values.get(key);
         if (s==null || s.isEmpty()) {
             throw new RuntimeException("Missing command line param: "+key);
@@ -112,23 +108,22 @@ public class CommandLineInterface {
     }
 
     /**
-     * Returns the double, or the default is absent. Throws if the double is specified but invalid.
+     * Returns the float, or the default is absent. Throws if the float is specified but invalid.
      */
-    private double getParamDouble(String key, double defaultValue) {
+    private float getParamFloat(String key, float defaultValue) {
         String value = values.get(key);
         if (value==null || value.isEmpty()) {
             return defaultValue;
         }
         try {
-            return Double.valueOf(value);
+            return Float.parseFloat(value);
         } catch (NumberFormatException e) {
-            throw new RuntimeException("Invalid double value: >>>"+value+"<<<", e);
+            throw new RuntimeException("Invalid float value: >>>"+value+"<<<", e);
         }
     }
 
     /**
      */
-    @Nullable
     private Long getParamLongOrNull(String key) {
         String value = values.get(key);
         if (value == null || value.isEmpty()) {
@@ -241,9 +236,9 @@ public class CommandLineInterface {
                     String text = line.substring(idx + 1);
 
                     TextObject textObject = textObjectFactory.forText(text);
-                    Optional<LdLocale> lang = languageDetector.detect(textObject);
+                    LdLocale lang = languageDetector.detect(textObject);
                     if (!result.containsKey(correctLang)) result.put(correctLang, new ArrayList<String>());
-                    if (lang.isPresent()) {
+                    if (lang != null) {
                         result.get(correctLang).add(lang.toString());
                     } else {
                         result.get(correctLang).add("unknown");
@@ -269,12 +264,12 @@ public class CommandLineInterface {
                     }
                 }
                 int correct = resultCount.containsKey(lang)?resultCount.get(lang):0;
-                double rate = correct / (double)count;
+                float rate = correct / (float)count;
                 System.out.println(String.format("%s (%d/%d=%.2f): %s", lang, correct, count, rate, resultCount));
                 totalCorrect += correct;
                 totalCount += count;
             }
-            System.out.println(String.format("total: %d/%d = %.3f", totalCorrect, totalCount, totalCorrect / (double) totalCount));
+            System.out.println(String.format("total: %d/%d = %.3f", totalCorrect, totalCount, totalCorrect / (float) totalCount));
         }
     }
 
@@ -284,9 +279,9 @@ public class CommandLineInterface {
      * Using all language profiles from the given directory.
      */
     private LanguageDetector makeDetector() throws IOException {
-        double alpha = getParamDouble("alpha", DEFAULT_ALPHA);
+        float alpha = getParamFloat("alpha", DEFAULT_ALPHA);
         String profileDirectory = requireParamString("directory") + "/";
-        Optional<Long> seed = Optional.fromNullable(getParamLongOrNull("seed"));
+        Long seed = getParamLongOrNull("seed");
 
         List<LanguageProfile> languageProfiles = new LanguageProfileReader().readAll(new File(profileDirectory));
 

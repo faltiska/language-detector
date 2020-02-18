@@ -17,8 +17,6 @@
 package com.optimaize.langdetect.ngram;
 
 import com.optimaize.langdetect.cybozu.util.NGram;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,9 +51,8 @@ public class OldNgramExtractor {
      * can be computed before making it (based on text length and number of n-grams).
      *
      */
-    @NotNull
     @Deprecated
-    public static List<String> extractNGrams(@NotNull CharSequence text, @Nullable Filter filter) {
+    public static List<String> extractNGrams(CharSequence text, Filter filter) {
         List<String> list = new ArrayList<>();
         NGram ngram = new NGram();
         for(int i=0;i<text.length();++i) {

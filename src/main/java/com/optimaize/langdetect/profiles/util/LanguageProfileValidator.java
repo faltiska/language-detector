@@ -16,9 +16,6 @@
 
 package com.optimaize.langdetect.profiles.util;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
 import com.optimaize.langdetect.DetectedLanguage;
 import com.optimaize.langdetect.LanguageDetector;
 import com.optimaize.langdetect.LanguageDetectorBuilder;
@@ -31,10 +28,7 @@ import com.optimaize.langdetect.text.TextObject;
 import com.optimaize.langdetect.text.TextObjectFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -129,12 +123,7 @@ public class LanguageProfileValidator {
      * @param isoString the ISO string of the LanguageProfile to be removed.
      */
     public LanguageProfileValidator removeLanguageProfile(final String isoString) {
-        Iterables.removeIf(this.languageProfiles, new Predicate<LanguageProfile>() {
-            @Override
-            public boolean apply(LanguageProfile languageProfile) {
-                return languageProfile.getLocale().getLanguage().equals(isoString);
-            }
-        });
+        languageProfiles.removeIf(languageProfile -> languageProfile.getLocale().getLanguage().equals(isoString));
         return this;
     }
 
@@ -142,22 +131,19 @@ public class LanguageProfileValidator {
      * Run the n-fold validation.
      * @return the average probability over all runs.
      */
-    public double validate() {
+    public float validate() {
         // remove a potential duplicate LanguageProfile
         this.removeLanguageProfile(this.languageProfileBuilder.build().getLocale().getLanguage());
 
         List<TextObject> partitionedInput = partition();
-        List<Double> probabilities = new ArrayList<>(this.k);
-
-        System.out.println("------------------- Running " + this.k + "-fold cross-validation -------------------");
+        List<Float> probabilities = new ArrayList<>(this.k);
 
         for (int i = 0; i < this.k; i++) {
-            System.out.println(" ----------------- Run " + (i + 1) + " -------------------");
             LanguageProfileBuilder lpb = new LanguageProfileBuilder(this.languageProfileBuilder);
             TextObject testSample = partitionedInput.get(i);
 
             List<TextObject> trainingSamples = new ArrayList<>(partitionedInput);
-            trainingSamples.remove(i);
+            trainingSamples.remove(i); //TODO this will throw a concurrent modification exception
             for (TextObject token : trainingSamples) {
                 lpb.addText(token);
             }
@@ -175,28 +161,28 @@ public class LanguageProfileValidator {
             List<DetectedLanguage> detectedLanguages = languageDetector.getProbabilities(testSample);
 
             try{
-                DetectedLanguage kResult = Iterables.find(detectedLanguages, new Predicate<DetectedLanguage>() {
-                    public boolean apply(DetectedLanguage language) {
-                        return language.getLocale().getLanguage().equals(languageProfile.getLocale().getLanguage());
+                Iterator<DetectedLanguage> iterator = detectedLanguages.iterator();
+                DetectedLanguage kResult = null;
+                while(iterator.hasNext()) {
+                    DetectedLanguage language = iterator.next();
+                    if(language.getLocale().getLanguage().equals(languageProfile.getLocale().getLanguage())) {
+                        kResult = language;
+                        break;
                     }
-                });
-
-                probabilities.add(kResult.getProbability());
-                System.out.println("Probability: " + kResult.getProbability());
-
-            }catch (NoSuchElementException e){
-                System.out.println("No match. Probability: 0");
-                probabilities.add(0D);
+                }
+                if(kResult != null) {
+                    probabilities.add(kResult.getProbability());
+                }
+            } catch (NoSuchElementException e){
+                probabilities.add(0f);
             }
         }
 
-        double sum = 0D;
-        for (Double token : probabilities) {
+        float sum = 0f;
+        for (Float token : probabilities) {
             sum += token;
         }
-        double avg = sum / this.k;
-
-        System.out.println("The average probability over all runs is: " + avg);
+        float avg = sum / this.k;
 
         return avg;
     }
@@ -205,13 +191,15 @@ public class LanguageProfileValidator {
         List<TextObject> result = new ArrayList<>(this.k);
         if (!breakWords) {
             int maxLength = this.inputSample.length() / (this.k - 1);
-            Pattern p = Pattern.compile("\\G\\s*(.{1," + maxLength + "})(?=\\s|$)", Pattern.DOTALL);
+            StringBuilder regexBuilder = new StringBuilder().append("\\G\\s*(.{1,").append(maxLength).append("})(?=\\s|$)");
+            Pattern p = Pattern.compile(regexBuilder.toString(), Pattern.DOTALL);
             Matcher m = p.matcher(this.inputSample);
             while (m.find())
                 result.add(textObjectFactory.create().append(m.group(1)));
         } else {
-            Splitter splitter = Splitter.fixedLength(this.k);
-            for (String token : splitter.split(this.inputSample.toString())) {
+            StringBuilder regexBuilder = new StringBuilder().append("(?<=\\G.{").append(this.k).append("})");
+            String[] split = this.inputSample.toString().split(regexBuilder.toString());
+            for (String token : split) {
                 result.add(textObjectFactory.create().append(token));
             }
         }

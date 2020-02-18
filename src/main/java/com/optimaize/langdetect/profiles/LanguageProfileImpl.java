@@ -16,10 +16,7 @@
 
 package com.optimaize.langdetect.profiles;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.optimaize.langdetect.i18n.LdLocale;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -30,11 +27,8 @@ import java.util.*;
  */
 public final class LanguageProfileImpl implements LanguageProfile {
 
-    @NotNull
     private final LdLocale locale;
-    @NotNull
     private final Map<Integer, Map<String,Integer>> ngrams;
-    @NotNull
     private final Stats stats;
 
     private static class Stats {
@@ -42,7 +36,6 @@ public final class LanguageProfileImpl implements LanguageProfile {
          * Key = gram length (1-3 or so).
          * Value = number of all occurrences of these grams combined.
          */
-        @NotNull
         private final Map<Integer, Long> numOccurrences;
 
         /**
@@ -50,22 +43,20 @@ public final class LanguageProfileImpl implements LanguageProfile {
          * Value = number of occurrences of the n-gram that occurs the least often.
          * this can be 1, or larger if a cutoff was applied to remove infrequent grams.
          */
-        @NotNull
         private final Map<Integer, Long> minGramCounts;
 
         /**
          * Key = gram length (1-3 or so).
          * Value = number of occurrences of the n-gram that occurs the most often.
          */
-        @NotNull
         private final Map<Integer, Long> maxGramCounts;
 
-        public Stats(@NotNull Map<Integer, Long> numOccurrences,
-                     @NotNull Map<Integer, Long> minGramCounts,
-                     @NotNull Map<Integer, Long> maxGramCounts) {
-            this.numOccurrences = ImmutableMap.copyOf(numOccurrences);
-            this.minGramCounts  = ImmutableMap.copyOf(minGramCounts);
-            this.maxGramCounts  = ImmutableMap.copyOf(maxGramCounts);
+        public Stats(Map<Integer, Long> numOccurrences,
+                     Map<Integer, Long> minGramCounts,
+                     Map<Integer, Long> maxGramCounts) {
+            this.numOccurrences = Collections.unmodifiableMap(numOccurrences);
+            this.minGramCounts  = Collections.unmodifiableMap(minGramCounts);
+            this.maxGramCounts  = Collections.unmodifiableMap(maxGramCounts);
         }
     }
 
@@ -73,10 +64,10 @@ public final class LanguageProfileImpl implements LanguageProfile {
     /**
      * Use the builder.
      */
-    LanguageProfileImpl(@NotNull LdLocale locale,
-                        @NotNull Map<Integer, Map<String, Integer>> ngrams) {
+    LanguageProfileImpl(LdLocale locale,
+                        Map<Integer, Map<String, Integer>> ngrams) {
         this.locale = locale;
-        this.ngrams = ImmutableMap.copyOf(ngrams);
+        this.ngrams = Collections.unmodifiableMap(ngrams);
         this.stats  = makeStats(ngrams);
     }
 
@@ -105,13 +96,12 @@ public final class LanguageProfileImpl implements LanguageProfile {
     }
 
 
-    @NotNull
     @Override
     public LdLocale getLocale() {
         return locale;
     }
 
-    @NotNull @Override
+    @Override
     public List<Integer> getGramLengths() {
         List<Integer> lengths = new ArrayList<>(ngrams.keySet());
         Collections.sort(lengths);
@@ -166,19 +156,16 @@ public final class LanguageProfileImpl implements LanguageProfile {
     }
 
 
-    @NotNull @Override
+    @Override
     public Iterable<Map.Entry<String,Integer>> iterateGrams() {
-        Iterable[] arr = new Iterable[ngrams.size()];
-        int i=0;
+        List<Map.Entry<String,Integer>> arr = new LinkedList<>();
         for (Map<String, Integer> stringIntegerMap : ngrams.values()) {
-            arr[i] = stringIntegerMap.entrySet();
-            i++;
+            arr.addAll(stringIntegerMap.entrySet());
         }
-        //noinspection unchecked
-        return Iterables.concat(arr);
+        return arr;
     }
 
-    @NotNull @Override
+    @Override
     public Iterable<Map.Entry<String, Integer>> iterateGrams(int gramLength) {
         return ngrams.get(gramLength).entrySet();
     }
@@ -206,9 +193,7 @@ public final class LanguageProfileImpl implements LanguageProfile {
         LanguageProfileImpl that = (LanguageProfileImpl) o;
 
         if (!locale.equals(that.locale)) return false;
-        if (!ngrams.equals(that.ngrams)) return false;
-
-        return true;
+        return ngrams.equals(that.ngrams);
     }
     @Override
     public int hashCode() {

@@ -17,11 +17,8 @@
 package com.optimaize.langdetect;
 
 import com.optimaize.langdetect.cybozu.util.Util;
-import com.google.common.base.Optional;
 import com.optimaize.langdetect.i18n.LdLocale;
 import com.optimaize.langdetect.ngram.NgramExtractor;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +39,7 @@ public final class LanguageDetectorImpl implements LanguageDetector {
     /**
      * TODO document what this is for, and why that value is chosen.
      */
-    private static final double ALPHA_WIDTH = 0.05;
+    private static final float ALPHA_WIDTH = 0.05f;
 
     /**
      * TODO document what this is for, and why that value is chosen.
@@ -52,7 +49,7 @@ public final class LanguageDetectorImpl implements LanguageDetector {
     /**
      * TODO document what this is for, and why that value is chosen.
      */
-    private static final double CONV_THRESHOLD = 0.99999;
+    private static final float CONV_THRESHOLD = 0.9999f;
 
     /**
      * TODO document what this is for, and why that value is chosen.
@@ -76,27 +73,25 @@ public final class LanguageDetectorImpl implements LanguageDetector {
 
     private static final Comparator<DetectedLanguage> PROBABILITY_SORTING_COMPARATOR = new Comparator<DetectedLanguage>() {
         public int compare(DetectedLanguage a, DetectedLanguage b) {
-            return Double.compare(b.getProbability(), a.getProbability());
+            return Float.compare(b.getProbability(), a.getProbability());
         }
     };
 
-    @NotNull
     private final NgramFrequencyData ngramFrequencyData;
 
     /**
      * User-defined language priorities, in the same order as {@code langlist}.
      */
-    @Nullable
-    private final double[] priorMap;
+private final float[] priorMap;
 
-    private final double alpha;
-    private final Optional<Long> seed;
+    private final float alpha;
+    private final Long seed;
     private final int shortTextAlgorithm;
-    private final double prefixFactor;
-    private final double suffixFactor;
+    private final float prefixFactor;
+    private final float suffixFactor;
 
-    private final double probabilityThreshold;
-    private final double minimalConfidence;
+    private final float probabilityThreshold;
+    private final float minimalConfidence;
 
     private final NgramExtractor ngramExtractor;
 
@@ -104,13 +99,13 @@ public final class LanguageDetectorImpl implements LanguageDetector {
     /**
      * Use the {@link LanguageDetectorBuilder}.
      */
-    LanguageDetectorImpl(@NotNull NgramFrequencyData ngramFrequencyData,
-                         double alpha, Optional<Long> seed, int shortTextAlgorithm,
-                         double prefixFactor, double suffixFactor,
-                         double probabilityThreshold,
-                         double minimalConfidence,
-                         @Nullable Map<LdLocale, Double> langWeightingMap,
-                         @NotNull NgramExtractor ngramExtractor) {
+    LanguageDetectorImpl(NgramFrequencyData ngramFrequencyData,
+                         float alpha, Long seed, int shortTextAlgorithm,
+                         float prefixFactor, float suffixFactor,
+                         float probabilityThreshold,
+                         float minimalConfidence,
+                         Map<LdLocale, Float> langWeightingMap,
+                         NgramExtractor ngramExtractor) {
         if (alpha<0d || alpha >1d) throw new IllegalArgumentException("alpha must be between 0 and 1, but was: "+alpha);
         if (prefixFactor <0d || prefixFactor >10d) throw new IllegalArgumentException("prefixFactor must be between 0 and 10, but was: "+prefixFactor);
         if (suffixFactor <0d || suffixFactor >10d) throw new IllegalArgumentException("suffixFactor must be between 0 and 10, but was: "+suffixFactor);
@@ -132,23 +127,23 @@ public final class LanguageDetectorImpl implements LanguageDetector {
 
 
     @Override
-    public Optional<LdLocale> detect(CharSequence text) {
+    public LdLocale detect(CharSequence text) {
         List<DetectedLanguage> probabilities = getProbabilities(text);
         if (probabilities.isEmpty()) {
-            return Optional.absent();
+            return null;
         } else {
             DetectedLanguage best = probabilities.get(0);
             if (best.getProbability() >= minimalConfidence) {
-                return Optional.of(best.getLocale());
+                return best.getLocale();
             } else {
-                return Optional.absent();
+                return null;
             }
         }
     }
 
     @Override
     public List<DetectedLanguage> getProbabilities(CharSequence text) {
-        double[] langprob = detectBlock(text);
+        float[] langprob = detectBlock(text);
         if (langprob==null) {
             return Collections.emptyList();
         } else {
@@ -160,8 +155,7 @@ public final class LanguageDetectorImpl implements LanguageDetector {
     /**
      * @return null if there are no "features" in the text (just noise).
      */
-    @Nullable
-    private double[] detectBlock(CharSequence text) {
+    private float[] detectBlock(CharSequence text) {
         if (text.length() <= shortTextAlgorithm) {
             Map<String, Integer> ngrams = ngramExtractor.extractCountedGrams(text);
             if (ngrams.isEmpty()) return null;
@@ -175,9 +169,9 @@ public final class LanguageDetectorImpl implements LanguageDetector {
 
     /**
      */
-    private double[] detectBlockShortText(Map<String, Integer> ngrams) {
-        double[] prob = initProbability();
-        double alpha = this.alpha; //TODO I don't understand what this does.
+    private float[] detectBlockShortText(Map<String, Integer> ngrams) {
+        float[] prob = initProbability();
+        float alpha = this.alpha; //TODO I don't understand what this does.
         for (Map.Entry<String, Integer> gramWithCount : ngrams.entrySet()) {
             updateLangProb(prob, gramWithCount.getKey(), gramWithCount.getValue(), alpha);
             if (Util.normalizeProb(prob) > CONV_THRESHOLD) break; //this break ensures that we quit the loop before all probabilities reach 0
@@ -191,13 +185,13 @@ public final class LanguageDetectorImpl implements LanguageDetector {
      * This is the original algorithm used for all text length.
      * It is inappropriate for short text.
      */
-    private double[] detectBlockLongText(List<String> ngrams) {
+    private float[] detectBlockLongText(List<String> ngrams) {
         assert !ngrams.isEmpty();
-        double[] langprob = new double[ngramFrequencyData.getLanguageList().size()];
-        Random rand = new Random(seed.or(DEFAULT_SEED));
+        float[] langprob = new float[ngramFrequencyData.getLanguageList().size()];
+        Random rand = new Random(seed == null ? DEFAULT_SEED : seed);
         for (int t = 0; t < N_TRIAL; ++t) {
-            double[] prob = initProbability();
-            double alpha = this.alpha + (rand.nextGaussian() * ALPHA_WIDTH);
+            float[] prob = initProbability();
+            float alpha = (float) (this.alpha + (rand.nextGaussian() * ALPHA_WIDTH));
 
             for (int i=0; i<ITERATION_LIMIT; i++) {
                 int r = rand.nextInt(ngrams.size());
@@ -218,14 +212,14 @@ public final class LanguageDetectorImpl implements LanguageDetector {
      * If there is the specified prior map, use it as initial map.
      * @return initialized map of language probabilities
      */
-    private double[] initProbability() {
-        double[] prob = new double[ngramFrequencyData.getLanguageList().size()];
+    private float[] initProbability() {
+        float[] prob = new float[ngramFrequencyData.getLanguageList().size()];
         if (priorMap != null) {
-            //TODO analyze and optimize this code, looks like double copy.
+            //TODO analyze and optimize this code, looks like float copy.
             System.arraycopy(priorMap, 0, prob, 0, prob.length);
-            for(int i=0;i<prob.length;++i) prob[i] = priorMap[i];
+            System.arraycopy(priorMap, 0, prob, 0, prob.length);
         } else {
-            for(int i=0;i<prob.length;++i) prob[i] = 1.0 / ngramFrequencyData.getLanguageList().size();
+            Arrays.fill(prob, 1.0f / ngramFrequencyData.getLanguageList().size());
         }
         return prob;
     }
@@ -235,14 +229,14 @@ public final class LanguageDetectorImpl implements LanguageDetector {
      * update language probabilities with N-gram string(N=1,2,3)
      * @param count 1-n: how often the gram occurred.
      */
-    private boolean updateLangProb(@NotNull double[] prob, @NotNull String ngram, int count, double alpha) {
-        double[] langProbMap = ngramFrequencyData.getProbabilities(ngram);
+    private boolean updateLangProb(float[] prob, String ngram, int count, float alpha) {
+        float[] langProbMap = ngramFrequencyData.getProbabilities(ngram);
         if (langProbMap==null) {
             return false;
         }
         if (logger.isTraceEnabled()) logger.trace(ngram + "(" + Util.unicodeEncode(ngram) + "):" + Util.wordProbToString(langProbMap, ngramFrequencyData.getLanguageList()));
 
-        double weight = alpha / BASE_FREQ;
+        float weight = alpha / BASE_FREQ;
         if (ngram.length() >1) {
             if (prefixFactor !=1.0 && ngram.charAt(0)==' ') {
                 weight *= prefixFactor;
@@ -263,12 +257,11 @@ public final class LanguageDetectorImpl implements LanguageDetector {
      * Returns the detected languages sorted by probabilities descending.
      * Languages with less probability than PROB_THRESHOLD are ignored.
      */
-    @NotNull
-    private List<DetectedLanguage> sortProbability(double[] prob) {
+    private List<DetectedLanguage> sortProbability(float[] prob) {
         List<DetectedLanguage> list = new ArrayList<>();
         //step 1: add all that have reached a minimal probability:
         for (int j=0;j<prob.length;++j) {
-            double p = prob[j];
+            float p = prob[j];
             if (p >= probabilityThreshold) {
                 list.add(new DetectedLanguage(ngramFrequencyData.getLanguage(j), p));
             }

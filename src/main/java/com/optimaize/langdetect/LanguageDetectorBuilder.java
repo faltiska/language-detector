@@ -16,12 +16,9 @@
 
 package com.optimaize.langdetect;
 
-import com.google.common.base.Optional;
 import com.optimaize.langdetect.i18n.LdLocale;
 import com.optimaize.langdetect.ngram.NgramExtractor;
 import com.optimaize.langdetect.profiles.LanguageProfile;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -37,47 +34,44 @@ import java.util.Set;
  */
 public class LanguageDetectorBuilder {
 
-    private static final double ALPHA_DEFAULT = 0.5;
+    private static final float ALPHA_DEFAULT = 0.5f;
 
-    @NotNull
     private final NgramExtractor ngramExtractor;
 
-    private double alpha = ALPHA_DEFAULT;
-    private Optional<Long> seed = Optional.absent();
+    private float alpha = ALPHA_DEFAULT;
+    private Long seed = null;
     private int shortTextAlgorithm = 50;
-    private double prefixFactor = 1.0d;
-    private double suffixFactor = 1.0d;
+    private float prefixFactor = 1.0f;
+    private float suffixFactor = 1.0f;
 
-    private double probabilityThreshold = 0.1;
-    private double minimalConfidence = 0.9999d;
+    private float probabilityThreshold = 0.1f;
+    private float minimalConfidence = 0.9999f;
 
-    @Nullable
-    private Map<LdLocale, Double> langWeightingMap;
+private Map<LdLocale, Float> langWeightingMap;
 
-    @NotNull
     private final Set<LanguageProfile> languageProfiles = new HashSet<>();
-    @NotNull
     private final Set<LdLocale> langsAdded = new HashSet<>();
 
-    public static LanguageDetectorBuilder create(@NotNull NgramExtractor ngramExtractor) {
+    public static LanguageDetectorBuilder create(NgramExtractor ngramExtractor) {
         return new LanguageDetectorBuilder(ngramExtractor);
     }
 
-    private LanguageDetectorBuilder(@NotNull NgramExtractor ngramExtractor) {
+    private LanguageDetectorBuilder(NgramExtractor ngramExtractor) {
         this.ngramExtractor = ngramExtractor;
     }
 
 
-    public LanguageDetectorBuilder alpha(double alpha) {
+    public LanguageDetectorBuilder alpha(float alpha) {
         if (alpha<0 || alpha>1) throw new IllegalArgumentException("alpha must be between 0 and 1, but was: "+alpha);
         this.alpha = alpha;
         return this;
     }
 
     public LanguageDetectorBuilder seed(long seed) {
-        return seed(Optional.of(seed));
+        return seed(seed);
     }
-    public LanguageDetectorBuilder seed(@NotNull Optional<Long> seed) {
+
+    public LanguageDetectorBuilder seed(Long seed) {
         this.seed = seed;
         return this;
     }
@@ -93,9 +87,9 @@ public class LanguageDetectorBuilder {
 
     /**
      * Sets prefixFactor() and suffixFactor() both to the given value.
-     * @see #prefixFactor(double)
+     * @see #prefixFactor(float)
      */
-    public LanguageDetectorBuilder affixFactor(double affixFactor) {
+    public LanguageDetectorBuilder affixFactor(float affixFactor) {
         prefixFactor(affixFactor);
         suffixFactor(affixFactor);
         return this;
@@ -105,21 +99,21 @@ public class LanguageDetectorBuilder {
      * in the middle of words, assign a value here.
      *
      * Affixes (prefixes and suffixes) often distinguish the specific features of languages.
-     * Giving a value greater than 1.0 weights these n-grams higher. A 2.0 weights them double.
+     * Giving a value greater than 1.0 weights these n-grams higher. A 2.0 weights them float.
      *
      * Defaults to 1.0, which means don't use this feature.
      * @param prefixFactor 0.0 to 10.0, a suggested value is 1.5
      */
-    public LanguageDetectorBuilder prefixFactor(double prefixFactor) {
+    public LanguageDetectorBuilder prefixFactor(float prefixFactor) {
         this.prefixFactor = prefixFactor;
         return this;
     }
     /**
      * Defaults to 1.0, which means don't use this feature.
      * @param suffixFactor 0.0 to 10.0, a suggested value is 2.0
-     * @see #prefixFactor(double)
+     * @see #prefixFactor(float)
      */
-    public LanguageDetectorBuilder suffixFactor(double suffixFactor) {
+    public LanguageDetectorBuilder suffixFactor(float suffixFactor) {
         this.suffixFactor = suffixFactor;
         return this;
     }
@@ -129,7 +123,7 @@ public class LanguageDetectorBuilder {
      * The default currently is 0.1 (the old hardcoded value), but don't rely on it, if you need to be sure
      * then set one.
      */
-    public LanguageDetectorBuilder probabilityThreshold(double probabilityThreshold) {
+    public LanguageDetectorBuilder probabilityThreshold(float probabilityThreshold) {
         this.probabilityThreshold = probabilityThreshold;
         return this;
     }
@@ -138,7 +132,7 @@ public class LanguageDetectorBuilder {
      * {@link LanguageDetector#detect} returns a language if the best detected language has at least this probability.
      * The default currently is 0.9999d, but don't rely on it, if you need to be sure then set one.
      */
-    public LanguageDetectorBuilder minimalConfidence(double minimalConfidence) {
+    public LanguageDetectorBuilder minimalConfidence(float minimalConfidence) {
         this.minimalConfidence = minimalConfidence;
         return this;
     }
@@ -147,9 +141,9 @@ public class LanguageDetectorBuilder {
     /**
      * TODO document exactly. Also explain how it influences the results.
      * Maybe check for unsupported languages at some point, or not, but document whether it does throw or ignore.
-     * String key = language, Double value = priority (probably 0-1).
+     * String key = language, Float value = priority (probably 0-1).
      */
-    public LanguageDetectorBuilder languagePriorities(@Nullable Map<LdLocale, Double> langWeightingMap) {
+    public LanguageDetectorBuilder languagePriorities(Map<LdLocale, Float> langWeightingMap) {
         this.langWeightingMap = langWeightingMap;
         return this;
     }

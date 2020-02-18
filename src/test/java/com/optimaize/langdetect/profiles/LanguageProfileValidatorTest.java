@@ -47,7 +47,7 @@ public class LanguageProfileValidatorTest {
                 .ngramExtractor(NgramExtractors.standard())
                 .minimalFrequency(5);
 
-        double result = new LanguageProfileValidator()
+        float result = new LanguageProfileValidator()
                 .loadAllBuiltInLanguageProfiles()
                 .setK(5)
                 .loadInputSample(inputText)

@@ -49,11 +49,11 @@ public class LanguageProfileWriterTest {
 
     protected void checkProfileCopy(String language) throws IOException {
         File originalFile = new File(PROFILE_DIR, language);
-        final LanguageProfile originalProfile = new LanguageProfileReader().read(originalFile);
+        final LanguageProfile originalProfile = new LanguageProfileReader().read(originalFile, language);
         File newFile = File.createTempFile("profile-copy-", null);
         try (FileOutputStream output = new FileOutputStream(newFile)) {
             new LanguageProfileWriter().write(originalProfile, output);
-            LanguageProfile newProfile = new LanguageProfileReader().read(newFile);
+            LanguageProfile newProfile = new LanguageProfileReader().read(newFile, language);
             assertEquals(newProfile.getLocale(), originalProfile.getLocale());
             assertEquals(newProfile.getNumGrams(), originalProfile.getNumGrams());
             assertEquals(newProfile.getGramLengths(), originalProfile.getGramLengths());

@@ -17,8 +17,6 @@
 package com.optimaize.langdetect.text;
 
 import com.optimaize.langdetect.cybozu.util.CharNormalizer;
-import com.google.common.annotations.Beta;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -45,22 +43,15 @@ import java.io.Reader;
  *
  * @author Fabian Kessler
  */
-@Beta
 public class TextObject implements CharSequence, Appendable {
-
-    @NotNull
     private final TextFilter textFilter;
-
-    @NotNull
     private final StringBuilder stringBuilder;
-
     private final int maxTextLength;
-
 
     /**
      * @param maxTextLength 0 for no limit
      */
-    public TextObject(@NotNull TextFilter textFilter, int maxTextLength) {
+    public TextObject(TextFilter textFilter, int maxTextLength) {
         this.textFilter = textFilter;
         this.maxTextLength = maxTextLength;
         this.stringBuilder = new StringBuilder();
@@ -115,12 +106,12 @@ public class TextObject implements CharSequence, Appendable {
     }
 
     @Override
-    public Appendable append(CharSequence csq, int start, int end) throws IOException {
+    public Appendable append(CharSequence csq, int start, int end) {
         return append(csq.subSequence(start, end));
     }
 
     @Override
-    public Appendable append(char c) throws IOException {
+    public Appendable append(char c) {
         return append(Character.toString(c));
     }
 
@@ -141,7 +132,7 @@ public class TextObject implements CharSequence, Appendable {
         return stringBuilder.subSequence(start, end);
     }
 
-    @Override @NotNull
+    @Override
     public String toString() {
         return stringBuilder.toString(); //only correct impl, see interface CharSequence!
     }

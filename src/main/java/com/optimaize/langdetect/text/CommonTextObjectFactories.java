@@ -28,7 +28,7 @@ public class CommonTextObjectFactories {
         return new TextObjectFactoryBuilder()
                 .maxTextLength(10000)
                 .withTextFilter(UrlTextFilter.getInstance())
-                .withTextFilter(RemoveMinorityScriptsTextFilter.forThreshold(0.3))
+                .withTextFilter(RemoveMinorityScriptsTextFilter.forThreshold(0.3f))
                 .build();
     }
 
@@ -40,7 +40,7 @@ public class CommonTextObjectFactories {
     public static TextObjectFactory forIndexing() {
         return new TextObjectFactoryBuilder()
                 .withTextFilter(UrlTextFilter.getInstance())
-                .withTextFilter(RemoveMinorityScriptsTextFilter.forThreshold(0.3))
+                .withTextFilter(RemoveMinorityScriptsTextFilter.forThreshold(0.3f))
                 .build();
     }
 

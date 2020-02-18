@@ -16,9 +16,9 @@
 
 package com.optimaize.langdetect.text;
 
-import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
@@ -29,24 +29,15 @@ import static org.junit.Assert.assertEquals;
 public class MultiTextFilterTest {
 
     @Test
-    public void empty() throws Exception {
-        assertEquals(new MultiTextFilter(Collections.<TextFilter>emptyList()).filter("foo"), "foo");
+    public void empty() {
+        assertEquals(new MultiTextFilter(Collections.emptyList()).filter("foo"), "foo");
     }
 
     @Test
-    public void doubleFilter() throws Exception {
-        assertEquals(new MultiTextFilter(ImmutableList.of(
-                new TextFilter() {
-                    @Override
-                    public String filter(CharSequence text) {
-                        return text.toString().replace("a", "A");
-                    }
-                }, new TextFilter() {
-                    @Override
-                    public String filter(CharSequence text) {
-                        return text.toString().replace("A", "B");
-                    }
-                }
+    public void floatFilter() {
+        assertEquals(new MultiTextFilter(Arrays.asList(
+                text -> text.toString().replace("a", "A"),
+                text -> text.toString().replace("A", "B")
         )).filter("nananaa"), "nBnBnBB");
     }
 }

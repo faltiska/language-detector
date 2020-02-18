@@ -18,7 +18,6 @@ package com.optimaize.langdetect.profiles;
 
 import com.optimaize.langdetect.frma.LangProfileReader;
 import com.optimaize.langdetect.i18n.LdLocale;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -39,15 +38,15 @@ public class LanguageProfileReader {
     /**
      * Reads a {@link LanguageProfile} from a File in UTF-8.
      */
-    public LanguageProfile read(File profileFile) throws IOException {
-        return OldLangProfileConverter.convert(internalReader.read(profileFile));
+    public LanguageProfile read(File profileFile, String name) throws IOException {
+        return OldLangProfileConverter.convert(internalReader.read(profileFile, name));
     }
 
     /**
      * Reads a {@link LanguageProfile} from an InputStream in UTF-8.
      */
-    public LanguageProfile read(InputStream inputStream) throws IOException {
-        return OldLangProfileConverter.convert(internalReader.read(inputStream));
+    public LanguageProfile read(InputStream inputStream, String name) throws IOException {
+        return OldLangProfileConverter.convert(internalReader.read(inputStream, name));
     }
 
 
@@ -68,7 +67,7 @@ public class LanguageProfileReader {
                 if (in == null) {
                     throw new IOException("No language file available named "+profileFileName+" at " + path + "!");
                 }
-                loaded.add( read(in) );
+                loaded.add(read(in, profileFileName));
             }
         }
         return loaded;
@@ -94,25 +93,22 @@ public class LanguageProfileReader {
         return read(LanguageProfileReader.class.getClassLoader(), PROFILES_DIR, profileFileNames);
     }
 
-    @NotNull
-    public LanguageProfile readBuiltIn(@NotNull LdLocale locale) throws IOException {
+    public LanguageProfile readBuiltIn(LdLocale locale) throws IOException {
         String filename = makeProfileFileName(locale);
         String path = makePathForClassLoader(PROFILES_DIR, filename);
         try (InputStream in = LanguageProfileReader.class.getClassLoader().getResourceAsStream(path)) {
             if (in == null) {
                 throw new IOException("No language file available named "+filename+" at " + path + "!");
             }
-            return read(in);
+            return read(in, filename);
         }
     }
 
-    @NotNull
-    private String makeProfileFileName(@NotNull LdLocale locale) {
+    private String makeProfileFileName(LdLocale locale) {
         return locale.toString();
     }
 
-    @NotNull
-    public List<LanguageProfile> readBuiltIn(@NotNull Collection<LdLocale> languages) throws IOException {
+    public List<LanguageProfile> readBuiltIn(Collection<LdLocale> languages) throws IOException {
         List<String> profileNames = new ArrayList<>();
         for (LdLocale locale : languages) {
             profileNames.add(makeProfileFileName(locale));
@@ -167,7 +163,7 @@ public class LanguageProfileReader {
             if (!looksLikeLanguageProfileFile(file)) {
                 continue;
             }
-            profiles.add(read(file));
+            profiles.add(read(file, file.getName()));
         }
         return profiles;
     }

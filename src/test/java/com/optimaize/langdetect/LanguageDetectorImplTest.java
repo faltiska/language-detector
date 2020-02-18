@@ -16,19 +16,21 @@
 
 package com.optimaize.langdetect;
 
-import com.optimaize.langdetect.frma.LangProfileReader;
 import com.optimaize.langdetect.cybozu.util.LangProfile;
-import com.google.common.collect.ImmutableList;
+import com.optimaize.langdetect.frma.LangProfileReader;
 import com.optimaize.langdetect.ngram.NgramExtractors;
 import com.optimaize.langdetect.profiles.LanguageProfile;
 import com.optimaize.langdetect.profiles.OldLangProfileConverter;
-import com.optimaize.langdetect.text.*;
+import com.optimaize.langdetect.text.CommonTextObjectFactories;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
-import static org.testng.Assert.*;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 
 /**
@@ -59,12 +61,12 @@ public class LanguageDetectorImplTest {
     private LanguageDetector makeNewDetector() throws IOException {
         LanguageDetectorBuilder builder = LanguageDetectorBuilder.create(NgramExtractors.standard())
             .shortTextAlgorithm(50)
-            .prefixFactor(1.5)
-            .suffixFactor(2.0);
+            .prefixFactor(1.5f)
+            .suffixFactor(2.0f);
 
         LangProfileReader langProfileReader = new LangProfileReader();
-        for (String language : ImmutableList.of("en", "fr", "nl", "de")) {
-            LangProfile langProfile = langProfileReader.read(LanguageDetectorImplTest.class.getResourceAsStream("/languages/" + language));
+        for (String language : Arrays.asList("en", "fr", "nl", "de")) {
+            LangProfile langProfile = langProfileReader.read(LanguageDetectorImplTest.class.getResourceAsStream("/languages/" + language), language);
             LanguageProfile languageProfile = OldLangProfileConverter.convert(langProfile);
             builder.withProfile(languageProfile);
         }

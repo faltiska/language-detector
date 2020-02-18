@@ -31,7 +31,7 @@ import java.util.Set;
  */
 public class RemoveMinorityScriptsTextFilter implements TextFilter {
 
-    private final double threshold;
+    private final float threshold;
 
     /**
      * If a script has less than this fraction of content compared to the most used one, its text is removed.
@@ -40,11 +40,11 @@ public class RemoveMinorityScriptsTextFilter implements TextFilter {
      *
      * @param threshold 0-1, suggested value is 0.3. If smaller then removed, equal remains.
      */
-    public static RemoveMinorityScriptsTextFilter forThreshold(double threshold) {
+    public static RemoveMinorityScriptsTextFilter forThreshold(float threshold) {
         return new RemoveMinorityScriptsTextFilter(threshold);
     }
 
-    private RemoveMinorityScriptsTextFilter(double threshold) {
+    private RemoveMinorityScriptsTextFilter(float threshold) {
         this.threshold = threshold;
     }
 
@@ -59,7 +59,7 @@ public class RemoveMinorityScriptsTextFilter implements TextFilter {
             Set<Character.UnicodeScript> toRemove = new HashSet<>();
             for (Map.Entry<Character.UnicodeScript, Long> entry : counts.entrySet()) {
                 if (entry.getValue()==most) continue;
-                double ratio = entry.getValue().doubleValue() / most;
+                float ratio = entry.getValue().floatValue() / most;
                 if (ratio <= threshold) {
                     toRemove.add(entry.getKey());
                 }

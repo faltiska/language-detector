@@ -17,7 +17,6 @@
 package com.optimaize.langdetect.profiles;
 
 import com.optimaize.langdetect.i18n.LdLocale;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -37,8 +36,6 @@ import java.util.Map;
  * @author Fabian Kessler
  */
 public interface LanguageProfile {
-
-    @NotNull
     LdLocale getLocale();
 
     /**
@@ -46,7 +43,6 @@ public interface LanguageProfile {
      * Example: [1,2,3]
      * @return Sorted from smaller to larger.
      */
-    @NotNull
     List<Integer> getGramLengths();
 
     /**
@@ -104,13 +100,11 @@ public interface LanguageProfile {
     /**
      * Iterates all ngram strings with frequency.
      */
-    @NotNull
     Iterable<Map.Entry<String,Integer>> iterateGrams();
 
     /**
      * Iterates all gramLength-gram strings with frequency.
      */
-    @NotNull
     Iterable<Map.Entry<String,Integer>> iterateGrams(int gramLength);
 
 }
